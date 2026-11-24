@@ -25,7 +25,7 @@ export default function Home() {
             <a href="#how">How it works</a>
             <a href="#about">Our mission</a>
           </nav>
-          <a className="header-cta" href="#how">See how it works <ArrowRight size={16} /></a>
+          <div className="header-account"><a className="header-signin" href="/login">Sign in</a><a className="header-cta" href="/register">Get started <ArrowRight size={16} /></a></div>
         </div>
       </header>
 
