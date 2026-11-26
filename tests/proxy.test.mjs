@@ -6,7 +6,7 @@ test('public homepage does not depend on session refresh, while account routes d
   const source = await readFile(new URL('../proxy.ts', import.meta.url), 'utf8');
   const matcher = source.match(/matcher: \[([^\]]+)\]/)?.[1];
   assert.ok(matcher);
-  for (const path of ['/login/:path*', '/register/:path*', '/dashboard/:path*', '/settings/:path*', '/quizzes/:path*', '/auth/:path*']) {
+  for (const path of ['/login/:path*', '/register/:path*', '/dashboard/:path*', '/settings/:path*', '/quizzes/:path*', '/host/:path*', '/api/lobby/host/:path*', '/auth/:path*']) {
     assert.ok(matcher.includes(`"${path}"`), `${path} is missing`);
   }
   assert.ok(!matcher.includes('"/"'));

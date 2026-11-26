@@ -12,8 +12,8 @@ test('landing navigation points to real sections', () => {
   }
 });
 
-test('landing page does not link to unimplemented quiz or game routes', () => {
-  assert.doesNotMatch(page, /href="\/(join|quizzes|play)/);
+test('landing page does not link directly to an unimplemented game', () => {
+  assert.doesNotMatch(page, /href="\/(play)/);
 });
 
 test('quiz artwork is explicitly identified as an illustration', () => {
