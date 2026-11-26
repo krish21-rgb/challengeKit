@@ -1,0 +1,5 @@
+import { Trophy } from "lucide-react";
+import type { LeaderboardEntry } from "@/lib/lobby/model";
+export function Leaderboard({ entries, playerId, final }: { entries: LeaderboardEntry[]; playerId?: string; final: boolean }) {
+  return <section className="players-card leaderboard-card"><div className="players-heading"><div><span className="workspace-kicker"><span /> {final ? "FINAL RESULTS" : "LITTLE WINS"}</span><h2>Leaderboard</h2></div><span className="players-icon"><Trophy size={20} /></span></div>{entries.length === 0 ? <p className="leaderboard-empty">No player scores yet.</p> : <ol className="leaderboard-list">{entries.map((entry, index) => <li key={entry.id}><span className="rank-number">{String(index + 1).padStart(2, "0")}</span><span className={`player-avatar tone-${index % 4}`}>{entry.nickname.slice(0, 1).toUpperCase()}</span><div><strong>{entry.nickname}{entry.id === playerId && <small> YOU</small>}</strong>{final && entry.correct !== undefined && <p>{entry.correct} correct · {entry.incorrect} incorrect · {entry.unanswered} unanswered</p>}</div><b>{entry.score} <small>PTS</small></b></li>)}</ol>}</section>;
+}
