@@ -9,20 +9,28 @@ export async function proxy(request: NextRequest) {
   const config = getSupabaseConfig();
   if (!config) return response;
 
-  const supabase = createServerClient(config.url, config.key, {
-    cookies: {
-      getAll: () => request.cookies.getAll(),
-      setAll(cookiesToSet) {
-        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-        response = NextResponse.next({ request });
-        cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
+  try {
+    const supabase = createServerClient(config.url, config.key, {
+      cookies: {
+        getAll: () => request.cookies.getAll(),
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+          response = NextResponse.next({ request });
+          cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
+        },
       },
-    },
-  });
-  await supabase.auth.getUser();
+    });
+    await supabase.auth.getUser();
+  } catch {
+    // Do not expose configuration or tokens in logs. Protected pages and
+    // actions still authenticate independently and never trust this proxy.
+    console.error("Unable to refresh the authentication session.");
+  }
   return response;
 }
 
+// The landing page is public and has no session-dependent content. New
+// authenticated routes must be added here when they are implemented.
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"],
+  matcher: ["/login/:path*", "/register/:path*", "/dashboard/:path*", "/settings/:path*", "/auth/:path*"],
 };
