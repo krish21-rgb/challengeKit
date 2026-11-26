@@ -32,5 +32,5 @@ export async function proxy(request: NextRequest) {
 // The landing page is public and has no session-dependent content. New
 // authenticated routes must be added here when they are implemented.
 export const config = {
-  matcher: ["/login/:path*", "/register/:path*", "/dashboard/:path*", "/settings/:path*", "/auth/:path*"],
+  matcher: ["/login/:path*", "/register/:path*", "/dashboard/:path*", "/settings/:path*", "/quizzes/:path*", "/auth/:path*"],
 };

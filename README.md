@@ -4,7 +4,7 @@ Learning is better when it’s a challenge.
 
 ## Current scope
 
-Phase 2 adds teacher registration, email/password sign-in, a protected teacher workspace, sign-out, and profile editing backed by Supabase Auth and PostgreSQL. The landing-page quiz card is illustrative. Quiz creation, student joining, live games, and reports are **not implemented** yet; there are no sample dashboard statistics.
+Phase 3 adds a teacher quiz library and editor, including draft and published quizzes, four-option questions, preview, duplication, reordering, and deletion. Dashboard quiz counts come from the database. Teacher registration, email/password sign-in, a protected workspace, and profile editing are backed by Supabase. The landing-page quiz card is illustrative. Student joining, live games, image uploads, and reports are **not implemented** yet.
 
 ## Local development
 
@@ -27,9 +27,10 @@ Open [http://localhost:3000](http://localhost:3000). Without Supabase configurat
 4. Set `NEXT_PUBLIC_SITE_URL=http://localhost:3000`. This is the exact site origin, with no path. Use an HTTPS origin for deployed environments.
 5. In Supabase **Authentication → URL Configuration**, set the Site URL to your site origin and add the exact callback URL, e.g. `http://localhost:3000/auth/callback`, to the Redirect URLs allowlist. For production, add `https://your-domain/auth/callback` and use the production domain as the Site URL. Allowlist the exact preview callback separately if testing previews.
 6. Enable email/password sign-in and email confirmation in Authentication settings. Register and open the confirmation link in the **same browser** where you started registration, because the PKCE verifier is stored there. If you open it elsewhere, sign in after confirming or retry registration in the original browser. Supabase's default email service has limits and is for testing; configure custom SMTP before production.
-7. Restart the development server after changing environment variables. Test with a new account after applying the migration.
+7. Run `supabase/migrations/20261127000000_quizzes.sql` once in the SQL Editor **after** the profiles migration. This adds quiz tables and atomic, authorized save/delete functions. Existing Phase 2 installations only need the new quiz migration. Back up existing data before changing a production database.
+8. Restart the development server after changing environment variables. Test with a new account after applying the migrations.
 
-The database trigger assigns `teacher` regardless of user-supplied metadata. RLS lets a signed-in user read only their own profile and update only their display name; role changes require a trusted administrative workflow. The app verifies the user and role on the server for each protected page and action. The profile migration is not a substitute for future quiz/game RLS policies.
+The database trigger assigns `teacher` regardless of user-supplied metadata. RLS lets a signed-in user read only their own profile and update only their display name; role changes require a trusted administrative workflow. The app verifies the user and role on the server for each protected page and action. Quiz, question, and answer-option reads are restricted to the owning teacher even when published; validated writes go through transactional database functions that independently check the authenticated teacher. Editing uses an update timestamp to reject stale saves. Quiz edits replace question and option rows; future live-game work must introduce a snapshot/versioning strategy before games reference them. Student/game policies will be added when those features are built.
 
 ## Verify
 
@@ -46,7 +47,8 @@ With Supabase configured, manually test:
 1. Open `/dashboard` signed out; you should be redirected to login. Open `/register`, create a teacher account, and confirm the email in the same browser.
 2. Sign in, check the dashboard, edit your display name in Settings, refresh, and confirm that it persists. Sign out and verify the protected pages redirect to login again.
 3. Test invalid inputs, incorrect credentials, keyboard navigation, and narrow screens. Try a second teacher account and confirm it cannot read or edit the first account’s profile through the Supabase API. Confirm an authenticated client cannot update its own `role` column.
-4. The quiz preview remains non-interactive; quiz creation and multiplayer have not been implemented.
+4. Create a draft, add complete questions, switch between questions without losing edits, reorder and duplicate questions, preview, publish, reload, duplicate the quiz, and delete a copy. Confirm the dashboard counts update. Verify a second teacher cannot read or modify the first teacher’s quiz or answer keys. Also test that publishing an empty quiz and a stale edit are rejected.
+5. Cover images currently accept a public HTTPS URL only; uploads, student play, and multiplayer are not implemented.
 
 ## GitHub and deployment
 
