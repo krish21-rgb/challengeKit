@@ -11,7 +11,7 @@ export async function saveQuiz(id: string | null, updatedAt: string | null, inpu
   if (error) return { ok: false, error };
   if ((id !== null && (!validQuizId(id) || !updatedAt || Number.isNaN(Date.parse(updatedAt)))) || (id === null && updatedAt !== null)) return { ok: false, error: "Invalid quiz version. Reload and try again." };
   const { data, error: saveError } = await supabase.rpc("save_teacher_quiz", { p_quiz_id: id, p_expected_updated_at: updatedAt, p_payload: input });
-  if (saveError?.message?.includes("End the waiting lobby")) return { ok: false, error: "End this quiz’s waiting lobby before editing it." };
+  if (saveError?.message?.includes("End the waiting lobby")) return { ok: false, error: "End this quiz’s lobby or active game before editing it." };
   if (saveError || !data || !validQuizId(data.id) || typeof data.updatedAt !== "string") return { ok: false, error: id ? "Could not save. The quiz may have changed in another tab; reload before trying again." : "Could not save your quiz. Check your connection and try again." };
   revalidatePath("/dashboard"); revalidatePath("/quizzes"); revalidatePath(`/quizzes/${data.id}`);
   return { ok: true, id: data.id, updatedAt: data.updatedAt };
@@ -20,7 +20,7 @@ export async function deleteQuiz(id: string): Promise<QuizActionResult> {
   const { supabase } = await requireTeacher();
   if (!validQuizId(id)) return { ok: false, error: "Invalid quiz." };
   const { data, error } = await supabase.rpc("delete_teacher_quiz", { p_quiz_id: id });
-  if (error?.message?.includes("End the waiting lobby")) return { ok: false, error: "End this quiz’s waiting lobby before deleting it." };
+  if (error?.message?.includes("End the waiting lobby")) return { ok: false, error: "End this quiz’s lobby or active game before deleting it." };
   if (error || !data) return { ok: false, error: "Could not delete the quiz. Please try again." };
   revalidatePath("/dashboard"); revalidatePath("/quizzes");
   return { ok: true };
